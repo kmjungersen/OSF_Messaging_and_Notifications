@@ -5,8 +5,7 @@ from txsockjs.factory import SockJSMultiFactory
 from txsockjs.utils import broadcast
 from txsockjs import multiplex
 
-from main import authenticate_username, TwistedChatConnection
-
+from main import TwistedChatConnection
 
 
 class MyClient(Protocol):
@@ -16,7 +15,8 @@ class MyClient(Protocol):
 
     def connectionMade(self):
         print 'Connection Made!'
-        self.user_login()
+
+        print self.transport
 
     def dataReceived(self, data):
         print 'Incoming Message: ' + data
@@ -27,11 +27,6 @@ class MyClient(Protocol):
         print 'Welcome to chat!  Please enter your name: '
         self.username = raw_input()
 
-        if authenticate_username(self.username):
-            print 'Welcome {}!'.format(self.username)
-        else:
-            print 'ERROR: Username already taken!'
-            self.user_login()
 
     def messaging(self):
         print 'Message to send: '

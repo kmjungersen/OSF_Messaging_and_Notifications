@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Benchmarking</title>
+        <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+        <script src="http://cdn.sockjs.org/sockjs-0.3.min.js"></script>
+
+        <script>
+            $(function() {
+                
+                function log(message) {
+                    console.log(message);
+                    
+                    var control = $('#log');
+                    
+                    control.html(control.html() + message + '<br/>');
+                    control.scrollTop(control.scrollTop() + 1000);
+                    
+                }
+                
+                log('Welcome to Benchmarking!');
+
+                var connection = null;
+
+                function connect() {
+                    
+                    //disconnect();
+                    
+                    connection = new SockJS('http://127.0.0.1:8020');
+
+                    connection.onopen = function() {
+                        log('opened sock');
+                        update_ui();
+                    };
+
+                    connection.onmessage = function(e) {
+                        log('Incoming:' + e.data);
+                    };
+
+                    connection.onclose = function() {
+                        log('disconnected.');
+                        connection = null;
+                        update_ui();
+                    };
+
+                }   //connect
+
+                function disconnect() {
+                    //log('disconnecting....');
+                    //connection.close();
+                }
+                
+                function update_ui() {
+                    var message = '';
+            
+                    if (connection== null || connection.readyState != SockJS.OPEN) {
+                      $('#status').text('disconnected');
+                      $('#connect').text('Connect');
+                    } else {
+                      $('#status').text('connected (' + connection.protocol + ')');
+                      $('#connect').text('Disconnect');
+                    }
+                }
+
+                $('#connect').click(function() {
+                    if (connection == null) {
+                      connect();
+                    } else {
+                      disconnect();
+                    }
+
+                    update_ui();
+                    return false;
+                  });
+
+                $('form').submit(function() {
+                    var text = $('#text').val();
+                    log('Sending: ' + text);
+                    connection.send(text);
+                    $('#text').val('').focus();
+                    return false;
+                });
+
+                        });
+
+
+
+
+
+        </script>
+</head>
+<body>
+
+    <div>
+        <a id="connect" href="#">Connect</a>&nbsp;|&nbsp;Status: <span id="status">disconnected</span>
+    </div>
+
+    <div id="log" style="width: 60em; height: 20em; overflow:auto; border: 1px solid black"></div>
+
+    <form id="chatform">
+        <input id="text" type="text" />
+        <input type="submit" />
+    </form>
+
+</body>
+</html>
